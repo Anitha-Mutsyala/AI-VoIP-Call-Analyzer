@@ -1,6 +1,10 @@
 import subprocess
+import shutil
 
-TSHARK_PATH = r"C:\Program Files\Wireshark\tshark.exe"
+TSHARK_PATH = shutil.which("tshark")
+
+if TSHARK_PATH is None:
+    raise RuntimeError("Tshark is not installed on this server.")
 
 
 def analyze_pcap(file_path):
