@@ -1,22 +1,32 @@
-import subprocess
+import os
 import shutil
+import subprocess
 
 TSHARK_PATH = shutil.which("tshark")
 
+# Windows fallback
 if TSHARK_PATH is None:
-    raise RuntimeError("Tshark is not installed on this server.")
+    WINDOWS_TSHARK = r"C:\Program Files\Wireshark\tshark.exe"
+
+    if os.path.exists(WINDOWS_TSHARK):
+        TSHARK_PATH = WINDOWS_TSHARK
+    else:
+        raise RuntimeError("Tshark is not installed or not found in PATH.")
 
 
 def analyze_pcap(file_path):
     """
     Reads a PCAP file using Tshark and returns packets as a list of dictionaries.
-    Uses streaming instead of loading the entire output into memory.
     """
 
     cmd = [
         TSHARK_PATH,
+        "-n",                     # Disable name resolution
+        "-Q",                     # Quiet mode
         "-r", file_path,
+        "-Y", "rtp || sip",
         "-T", "fields",
+        "-E", "separator=\t",
         "-e", "frame.time_epoch",
         "-e", "_ws.col.Protocol",
         "-e", "ip.src",
@@ -26,22 +36,27 @@ def analyze_pcap(file_path):
         "-e", "rtp.ssrc",
         "-e", "rtp.p_type",
         "-e", "sip.Method",
-        "-e", "sip.Status-Code"
+        "-e", "sip.Status-Code",
     ]
 
-    process = subprocess.Popen(
+    result = subprocess.run(
         cmd,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        capture_output=True,
         text=True,
-        bufsize=1
+        timeout=240
     )
+
+    if result.returncode != 0:
+        raise RuntimeError(result.stderr)
 
     packet_rows = []
 
-    for line in process.stdout:
+    for line in result.stdout.splitlines():
 
-        parts = line.rstrip("\n").split("\t")
+        if not line.strip():
+            continue
+
+        parts = line.split("\t")
 
         while len(parts) < 10:
             parts.append("")
@@ -56,7 +71,7 @@ def analyze_pcap(file_path):
             ssrc,
             payload,
             sip_method,
-            sip_status
+            sip_status,
         ) = parts
 
         try:
@@ -86,11 +101,5 @@ def analyze_pcap(file_path):
             "sip_method": sip_method,
             "sip_status": sip_status
         })
-
-    stderr = process.stderr.read()
-    return_code = process.wait()
-
-    if return_code != 0:
-        raise Exception(stderr)
 
     return packet_rows
