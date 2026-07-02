@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoIP Analysis Report</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+<div class="background"></div>
+
+<nav class="navbar">
+
+    <div class="logo">
+
+        <div class="logo-icon">📡</div>
+
+        <div>
+
+            <h2>VoIP Analyzer AI</h2>
+
+            <p>Analysis Report</p>
+
+        </div>
+
+    </div>
+
+    <a href="/" class="back-btn">← New Analysis</a>
+
+</nav>
+
+<div class="dashboard-container">
+
+    <div class="page-title">
+
+        <h1>VoIP Call Analysis Report</h1>
+
+        <p>Professional AI Generated Diagnostics</p>
+
+    </div>
+
+    <!-- Dashboard Cards -->
+
+    <div class="cards">
+
+        <div class="card">
+
+            <span>Packet Loss</span>
+
+            <h2>{{ "%.2f"|format(stats.packet_loss) }}%</h2>
+
+        </div>
+
+        <div class="card">
+
+            <span>Average Jitter</span>
+
+            <h2>{{ stats.average_jitter }} ms</h2>
+
+        </div>
+
+        <div class="card">
+
+            <span>RTP Streams</span>
+
+            <h2>{{ stats.total_streams }}</h2>
+
+        </div>
+
+        <div class="card">
+
+            <span>Issues Detected</span>
+
+            <h2>{{ issues|length }}</h2>
+
+        </div>
+
+    </div>
+
+    <!-- Status -->
+
+    <div class="section">
+
+        <h2>Call Quality</h2>
+
+        <div class="status">
+
+            {{ status }}
+
+        </div>
+
+    </div>
+
+    <!-- AI Summary -->
+
+    <div class="section">
+
+        <h2>AI Summary</h2>
+
+        <div class="analysis-box">
+
+            <pre>{{ summary }}</pre>
+
+        </div>
+
+    </div>
+
+    <!-- Issues -->
+
+    <div class="section">
+
+        <h2>Detected Issues</h2>
+
+        {% if issues %}
+
+            {% for issue in issues %}
+
+            <div class="feature" style="margin-top:20px;">
+
+                <h3>{{ issue.title }}</h3>
+
+                <p><strong>Severity:</strong> {{ issue.severity }}</p>
+
+                <p><strong>Reason:</strong> {{ issue.reason }}</p>
+
+                <p><strong>Recommendation:</strong> {{ issue.recommendation }}</p>
+
+                <p><strong>Confidence:</strong> {{ issue.confidence }}%</p>
+
+            </div>
+
+            {% endfor %}
+
+        {% else %}
+
+            <p>No issues detected.</p>
+
+        {% endif %}
+
+    </div>
+
+    <!-- Stream Table -->
+
+    <div class="section">
+
+        <h2>RTP Stream Metrics</h2>
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>#</th>
+
+                    <th>Source</th>
+
+                    <th>Destination</th>
+
+                    <th>Packets</th>
+
+                    <th>Loss %</th>
+
+                    <th>Jitter</th>
+
+                    <th>SSRC Changes</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+            {% for stream in stats.streams %}
+
+                <tr>
+
+                    <td>{{ loop.index }}</td>
+
+                    <td>{{ stream.src }}</td>
+
+                    <td>{{ stream.dst }}</td>
+
+                    <td>{{ stream.packet_count }}</td>
+
+                    <td>{{ "%.2f"|format(stream.packet_loss) }}</td>
+
+                    <td>{{ stream.average_jitter }}</td>
+
+                    <td>{{ stream.ssrc_changes }}</td>
+
+                </tr>
+
+            {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+</div>
+
+</body>
+
+</html>

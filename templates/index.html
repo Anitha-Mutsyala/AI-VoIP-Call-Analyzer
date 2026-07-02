@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI VoIP Call Analyzer</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+
+<body>
+
+<div class="background"></div>
+
+<nav class="navbar">
+
+<div class="logo">
+
+<div class="logo-icon">📡</div>
+
+<div>
+
+<h2>VoIP Analyzer AI</h2>
+
+<p>Professional PCAP Diagnostics</p>
+
+</div>
+
+</div>
+
+</nav>
+
+<section class="hero">
+
+<div class="left">
+
+<span class="badge">
+🚀 AI Powered Telecom Diagnostics
+</span>
+
+<h1>
+
+Analyze VoIP Calls Like a Telecom Engineer
+
+</h1>
+
+<p>
+
+Upload a PCAP capture and instantly detect RTP packet loss,
+codec issues, SSRC changes, jitter and receive an AI-generated
+root cause analysis.
+
+</p>
+
+<form action="/upload" method="POST" enctype="multipart/form-data" class="upload-card">
+
+<div class="upload-area">
+
+<h3>📂 Select PCAP File</h3>
+
+<p>Supported: .pcap .pcapng</p>
+
+<input type="file" name="file" required>
+
+</div>
+
+<button type="submit">
+
+Analyze PCAP →
+
+</button>
+
+</form>
+
+</div>
+
+</section>
+
+<section class="features">
+
+<div class="feature">
+
+<h2>📡 RTP Analysis</h2>
+
+<p>
+
+Packet loss, sequence gaps,
+SSRC changes,
+payload analysis,
+MOS estimation.
+
+</p>
+
+</div>
+
+<div class="feature">
+
+<h2>📞 SIP Inspection</h2>
+
+<p>
+
+INVITE,
+REGISTER,
+BYE,
+Call Flow,
+Response Codes,
+Codec Negotiation.
+
+</p>
+
+</div>
+
+<div class="feature">
+
+<h2>🧠 AI Diagnosis</h2>
+
+<p>
+
+Automatic root cause analysis,
+confidence score,
+recommendations.
+
+</p>
+
+</div>
+
+<div class="feature">
+
+<h2>📊 Dashboard</h2>
+
+<p>
+
+Beautiful enterprise dashboard
+with stream metrics and health
+status.
+
+</p>
+
+</div>
+
+</section>
+
+<footer>
+
+Built for VoIP Engineers • SIP Analysts • NOC Teams
+
+</footer>
+
+</body>
+</html>
