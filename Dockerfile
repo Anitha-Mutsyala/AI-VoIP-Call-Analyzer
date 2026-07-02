@@ -1,8 +1,9 @@
 FROM python:3.11-slim
 
-# Install tshark
+ENV DEBIAN_FRONTEND=noninteractive
+
 RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y tshark && \
+    apt-get install -y tshark && \
     rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
