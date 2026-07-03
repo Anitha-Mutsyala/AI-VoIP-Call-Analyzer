@@ -124,3 +124,28 @@ th{background:#1e293b}
 .left h1{font-size:38px}
 .navbar{flex-direction:column;gap:20px}
 }
+.download-btn{
+
+    display:inline-block;
+
+    padding:14px 28px;
+
+    background:#2563eb;
+
+    color:white;
+
+    text-decoration:none;
+
+    border-radius:10px;
+
+    font-weight:600;
+
+    transition:.3s;
+}
+
+.download-btn:hover{
+
+    background:#1d4ed8;
+
+    transform:translateY(-2px);
+}

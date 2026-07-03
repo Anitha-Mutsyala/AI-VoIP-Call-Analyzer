@@ -16,13 +16,13 @@ if TSHARK_PATH is None:
 
 def analyze_pcap(file_path):
     """
-    Reads a PCAP file using Tshark and returns packets as a list of dictionaries.
+    Reads a PCAP using Tshark and processes packets as they are produced.
     """
 
     cmd = [
         TSHARK_PATH,
-        "-n",                     # Disable name resolution
-        "-Q",                     # Quiet mode
+        "-n",
+        "-Q",
         "-r", file_path,
         "-Y", "rtp || sip",
         "-T", "fields",
@@ -36,24 +36,24 @@ def analyze_pcap(file_path):
         "-e", "rtp.ssrc",
         "-e", "rtp.p_type",
         "-e", "sip.Method",
-        "-e", "sip.Status-Code",
+        "-e", "sip.Status-Code"
     ]
 
-    result = subprocess.run(
+    process = subprocess.Popen(
         cmd,
-        capture_output=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
         text=True,
-        timeout=240
+        bufsize=1
     )
-
-    if result.returncode != 0:
-        raise RuntimeError(result.stderr)
 
     packet_rows = []
 
-    for line in result.stdout.splitlines():
+    for line in process.stdout:
 
-        if not line.strip():
+        line = line.strip()
+
+        if not line:
             continue
 
         parts = line.split("\t")
@@ -71,7 +71,7 @@ def analyze_pcap(file_path):
             ssrc,
             payload,
             sip_method,
-            sip_status,
+            sip_status
         ) = parts
 
         try:
@@ -101,5 +101,12 @@ def analyze_pcap(file_path):
             "sip_method": sip_method,
             "sip_status": sip_status
         })
+
+    stderr = process.stderr.read()
+
+    process.wait()
+
+    if process.returncode != 0:
+        raise RuntimeError(stderr)
 
     return packet_rows
