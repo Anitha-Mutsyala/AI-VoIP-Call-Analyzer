@@ -36,17 +36,10 @@ def upload():
     if file.filename == "":
         return "No file selected."
 
-    if not (
-        file.filename.lower().endswith(".pcap")
-        or file.filename.lower().endswith(".pcapng")
-    ):
+    if not file.filename.lower().endswith((".pcap", ".pcapng")):
         return "Only .pcap or .pcapng files are supported."
 
-    filepath = os.path.join(
-        app.config["UPLOAD_FOLDER"],
-        file.filename
-    )
-
+    filepath = os.path.join(app.config["UPLOAD_FOLDER"], file.filename)
     file.save(filepath)
 
     try:
@@ -54,7 +47,7 @@ def upload():
         # Parse packets
         packet_rows = analyze_pcap(filepath)
 
-        # Build RTP Streams
+        # Build RTP streams
         streams = build_streams(packet_rows)
 
         stream_metrics = []
@@ -68,38 +61,46 @@ def upload():
 
             stream_metrics.append(metric)
 
-        # Detect Issues
+        # Detect issues
         issues = find_root_causes(stream_metrics)
 
-        # Call Status
-        if any(issue["severity"] == "High" for issue in issues):
+        # Call Quality
+        if any(i["severity"] == "High" for i in issues):
             status = "Poor"
-
-        elif any(issue["severity"] == "Medium" for issue in issues):
+        elif any(i["severity"] == "Medium" for i in issues):
             status = "Fair"
-
         else:
             status = "Good"
 
-        # AI Summary
         summary = generate_ai_summary(streams, issues)
 
+        # ----------------------------
         # Dashboard Statistics
+        # ----------------------------
+
+        total_packets = sum(s["packet_count"] for s in stream_metrics)
+        total_lost = sum(s["packet_loss"] for s in stream_metrics)
+
+        packet_loss_percent = 0
+
+        if (total_packets + total_lost) > 0:
+            packet_loss_percent = round(
+                (total_lost / (total_packets + total_lost)) * 100,
+                2
+            )
+
+        average_jitter = round(
+            sum(s["average_jitter"] for s in stream_metrics)
+            / max(len(stream_metrics), 1),
+            2
+        )
+
         stats = {
             "total_streams": len(stream_metrics),
-            "total_packets": sum(
-                s["packet_count"] for s in stream_metrics
-            ),
-            "packet_loss": sum(
-                s["packet_loss"] for s in stream_metrics
-            ),
-            "average_jitter": round(
-                sum(
-                    s["average_jitter"]
-                    for s in stream_metrics
-                ) / max(len(stream_metrics), 1),
-                2
-            ),
+            "total_packets": total_packets,
+            "packet_loss": total_lost,
+            "packet_loss_percent": packet_loss_percent,
+            "average_jitter": average_jitter,
             "ssrc_changes": sum(
                 s["ssrc_changes"] for s in stream_metrics
             ),
@@ -121,7 +122,7 @@ def upload():
             summary=summary,
             issues=issues,
             stats=stats,
-            packet_loss=round(stats["packet_loss"], 2),
+            packet_loss=stats["packet_loss_percent"],
             jitter=stats["average_jitter"],
             streams=stats["total_streams"],
             issue_count=len(issues)
@@ -136,373 +137,23 @@ def upload():
         <a href="/">Go Back</a>
         """
 
-def find_root_causes(stream_metrics):
 
-    issues = []
-
-    for stream in stream_metrics:
-
-        stream_name = f"{stream['src']} → {stream['dst']}"
-
-        loss = stream["packet_loss_percent"]
-        jitter = stream["average_jitter"]
-        gaps = stream["sequence_gaps"]
-        ssrc = stream["ssrc_changes"]
-        payloads = stream["payload_types"]
-
-        # -------------------------
-        # Severe Packet Loss
-        # -------------------------
-
-        if loss >= 10:
-
-            issues.append({
-
-                "title": "Severe Voice Breakage",
-
-                "stream": stream_name,
-
-                "severity": "High",
-
-                "reason":
-                f"Packet loss reached {loss}% ({stream['packet_loss']} RTP packets missing).",
-
-                "recommendation":
-                "Investigate client internet connection, congestion, VPN, Wi-Fi quality or packet drops.",
-
-                "confidence": 98
-
-            })
-
-        elif loss >= 3:
-
-            issues.append({
-
-                "title": "Minor Voice Breakage",
-
-                "stream": stream_name,
-
-                "severity": "Medium",
-
-                "reason":
-                f"Packet loss of {loss}% detected.",
-
-                "recommendation":
-                "Monitor network quality and verify RTP delivery.",
-
-                "confidence": 90
-
-            })
-
-        # -------------------------
-        # High Jitter
-        # -------------------------
-
-        if jitter >= 0.05:
-
-            issues.append({
-
-                "title": "High RTP Jitter",
-
-                "stream": stream_name,
-
-                "severity": "High",
-
-                "reason":
-                f"Average jitter is {jitter:.4f} seconds causing irregular packet arrival.",
-
-                "recommendation":
-                "Check unstable client network or WAN congestion.",
-
-                "confidence": 94
-
-            })
-
-        elif jitter >= 0.02:
-
-            issues.append({
-
-                "title": "Moderate RTP Jitter",
-
-                "stream": stream_name,
-
-                "severity": "Medium",
-
-                "reason":
-                f"Average jitter is {jitter:.4f} seconds.",
-
-                "recommendation":
-                "Network latency fluctuations detected.",
-
-                "confidence": 87
-
-            })
-
-        # -------------------------
-        # Sequence Gaps
-        # -------------------------
-
-        if gaps >= 20:
-
-            issues.append({
-
-                "title": "Multiple RTP Sequence Gaps",
-
-                "stream": stream_name,
-
-                "severity": "High",
-
-                "reason":
-                f"{gaps} RTP sequence discontinuities detected.",
-
-                "recommendation":
-                "Likely caused by packet drops or network congestion.",
-
-                "confidence": 95
-
-            })
-
-        # -------------------------
-        # SSRC Changes
-        # -------------------------
-
-        if ssrc > 0:
-
-            issues.append({
-
-                "title": "Media Stream Restart",
-
-                "stream": stream_name,
-
-                "severity": "Medium",
-
-                "reason":
-                f"SSRC changed {ssrc} times during the RTP stream.",
-
-                "recommendation":
-                "Possible media server restart, call transfer or bot media restart.",
-
-                "confidence": 93
-
-            })
-
-        # -------------------------
-        # Codec Change
-        # -------------------------
-
-        if len(payloads) > 1:
-
-            issues.append({
-
-                "title": "Codec/Payload Change",
-
-                "stream": stream_name,
-
-                "severity": "Medium",
-
-                "reason":
-                f"Multiple RTP payload types detected: {', '.join(payloads)}.",
-
-                "recommendation":
-                "Possible codec renegotiation or transcoding.",
-
-                "confidence": 91
-
-            })
-
-    return issues
-def find_root_causes(stream_metrics):
-
-    issues = []
-
-    for stream in stream_metrics:
-
-        stream_name = f"{stream['src']} → {stream['dst']}"
-
-        loss = stream["packet_loss_percent"]
-        jitter = stream["average_jitter"]
-        gaps = stream["sequence_gaps"]
-        ssrc = stream["ssrc_changes"]
-        payloads = stream["payload_types"]
-
-        # -------------------------
-        # Severe Packet Loss
-        # -------------------------
-
-        if loss >= 10:
-
-            issues.append({
-
-                "title": "Severe Voice Breakage",
-
-                "stream": stream_name,
-
-                "severity": "High",
-
-                "reason":
-                f"Packet loss reached {loss}% ({stream['packet_loss']} RTP packets missing).",
-
-                "recommendation":
-                "Investigate client internet connection, congestion, VPN, Wi-Fi quality or packet drops.",
-
-                "confidence": 98
-
-            })
-
-        elif loss >= 3:
-
-            issues.append({
-
-                "title": "Minor Voice Breakage",
-
-                "stream": stream_name,
-
-                "severity": "Medium",
-
-                "reason":
-                f"Packet loss of {loss}% detected.",
-
-                "recommendation":
-                "Monitor network quality and verify RTP delivery.",
-
-                "confidence": 90
-
-            })
-
-        # -------------------------
-        # High Jitter
-        # -------------------------
-
-        if jitter >= 0.05:
-
-            issues.append({
-
-                "title": "High RTP Jitter",
-
-                "stream": stream_name,
-
-                "severity": "High",
-
-                "reason":
-                f"Average jitter is {jitter:.4f} seconds causing irregular packet arrival.",
-
-                "recommendation":
-                "Check unstable client network or WAN congestion.",
-
-                "confidence": 94
-
-            })
-
-        elif jitter >= 0.02:
-
-            issues.append({
-
-                "title": "Moderate RTP Jitter",
-
-                "stream": stream_name,
-
-                "severity": "Medium",
-
-                "reason":
-                f"Average jitter is {jitter:.4f} seconds.",
-
-                "recommendation":
-                "Network latency fluctuations detected.",
-
-                "confidence": 87
-
-            })
-
-        # -------------------------
-        # Sequence Gaps
-        # -------------------------
-
-        if gaps >= 20:
-
-            issues.append({
-
-                "title": "Multiple RTP Sequence Gaps",
-
-                "stream": stream_name,
-
-                "severity": "High",
-
-                "reason":
-                f"{gaps} RTP sequence discontinuities detected.",
-
-                "recommendation":
-                "Likely caused by packet drops or network congestion.",
-
-                "confidence": 95
-
-            })
-
-        # -------------------------
-        # SSRC Changes
-        # -------------------------
-
-        if ssrc > 0:
-
-            issues.append({
-
-                "title": "Media Stream Restart",
-
-                "stream": stream_name,
-
-                "severity": "Medium",
-
-                "reason":
-                f"SSRC changed {ssrc} times during the RTP stream.",
-
-                "recommendation":
-                "Possible media server restart, call transfer or bot media restart.",
-
-                "confidence": 93
-
-            })
-
-        # -------------------------
-        # Codec Change
-        # -------------------------
-
-        if len(payloads) > 1:
-
-            issues.append({
-
-                "title": "Codec/Payload Change",
-
-                "stream": stream_name,
-
-                "severity": "Medium",
-
-                "reason":
-                f"Multiple RTP payload types detected: {', '.join(payloads)}.",
-
-                "recommendation":
-                "Possible codec renegotiation or transcoding.",
-
-                "confidence": 91
-
-            })
-
-    return issues
 @app.route("/download-report")
 def download_report():
 
     global latest_report
 
     if latest_report is None:
-        return "No analysis report available."
-
-    styles = getSampleStyleSheet()
+        return "No report available."
 
     buffer = BytesIO()
 
     pdf = SimpleDocTemplate(buffer)
 
+    styles = getSampleStyleSheet()
+
     elements = []
 
-    # Title
     elements.append(
         Paragraph("AI VoIP Call Analysis Report", styles["Title"])
     )
@@ -524,7 +175,7 @@ def download_report():
     stats = latest_report["stats"]
 
     elements.append(
-        Paragraph("<br/><b>Analysis Statistics</b>", styles["Heading2"])
+        Paragraph("<br/><b>Statistics</b>", styles["Heading2"])
     )
 
     elements.append(
@@ -536,14 +187,14 @@ def download_report():
 
     elements.append(
         Paragraph(
-            f"Total Packets: {stats['total_packets']}",
+            f"Total RTP Packets: {stats['total_packets']}",
             styles["BodyText"]
         )
     )
 
     elements.append(
         Paragraph(
-            f"Packet Loss: {stats['packet_loss']}",
+            f"Packet Loss: {stats['packet_loss_percent']}%",
             styles["BodyText"]
         )
     )
@@ -562,7 +213,6 @@ def download_report():
         )
     )
 
-    # Issues
     elements.append(
         Paragraph("<br/><b>Detected Issues</b>", styles["Heading2"])
     )
@@ -573,12 +223,14 @@ def download_report():
 
             elements.append(
                 Paragraph(
-                    f"<b>Title:</b> {issue['title']}<br/>"
-                    f"<b>Stream:</b> {issue['stream']}<br/>"
-                    f"<b>Severity:</b> {issue['severity']}<br/>"
-                    f"<b>Reason:</b> {issue['reason']}<br/>"
-                    f"<b>Recommendation:</b> {issue['recommendation']}<br/>"
-                    f"<b>Confidence:</b> {issue['confidence']}%<br/><br/>",
+                    f"""
+                    <b>{issue['title']}</b><br/>
+                    <b>Severity:</b> {issue['severity']}<br/>
+                    <b>Stream:</b> {issue['stream']}<br/>
+                    <b>Reason:</b> {issue['reason']}<br/>
+                    <b>Recommendation:</b> {issue['recommendation']}<br/>
+                    <b>Confidence:</b> {issue['confidence']}%
+                    """,
                     styles["BodyText"]
                 )
             )
@@ -602,6 +254,7 @@ def download_report():
         download_name="VoIP_Analysis_Report.pdf",
         mimetype="application/pdf"
     )
+
 
 if __name__ == "__main__":
     app.run(debug=True)

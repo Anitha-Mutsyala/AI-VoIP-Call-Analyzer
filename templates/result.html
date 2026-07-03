@@ -2,134 +2,256 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VoIP Analysis Report</title>
+
+    <title>AI VoIP Analysis Report</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
+          rel="stylesheet">
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+<!-- Browser Tab Icon -->
+<link rel="icon"
+      type="image/png"
+      href="{{ url_for('static', filename='images/favicon.png') }}">
+
 </head>
 
 <body>
 
 <div class="background"></div>
 
-<nav class="navbar">
+<header class="navbar">
 
-    <div class="logo">
+    <div class="container">
 
-        <div class="logo-icon">📡</div>
+        <div class="logo">
 
-        <div>
+            <img src="{{ url_for('static', filename='images/logo.png') }}">
 
-            <h2>VoIP Analyzer AI</h2>
+            <div>
 
-            <p>Analysis Report</p>
+                <h2>PCAP Analyzer</h2>
+
+                <span>AI VoIP Diagnostics</span>
+
+            </div>
+
+        </div>
+
+        <div class="header-buttons">
+
+            <a href="/" class="secondary-btn">
+
+                <i class="fa-solid fa-arrow-left"></i>
+
+                New Analysis
+
+            </a>
+
+            <a href="/download-report" class="primary-btn">
+
+                <i class="fa-solid fa-download"></i>
+
+                Download PDF
+
+            </a>
 
         </div>
 
     </div>
 
-    <a href="/" class="back-btn">← New Analysis</a>
+</header>
 
-</nav>
 
-<div class="dashboard-container">
+<div class="container">
 
-    <div class="page-title">
+    <!-- STATUS -->
 
-        <h1>VoIP Call Analysis Report</h1>
+    <section class="status-banner">
 
-        <p>Professional AI Generated Diagnostics</p>
+        {% if status=="Good" %}
 
-    </div>
+            <div class="status-card good">
 
-    <!-- Dashboard Cards -->
+                <i class="fa-solid fa-circle-check"></i>
 
-    <div class="cards">
+                <div>
 
-        <div class="card">
+                    <h2>Good Call Quality</h2>
 
-            <span>Packet Loss</span>
+                    <p>No significant RTP issues detected.</p>
 
-            <h2>{{ "%.2f"|format(stats.packet_loss) }}%</h2>
+                </div>
 
-        </div>
+            </div>
 
-        <div class="card">
+        {% elif status=="Fair" %}
 
-            <span>Average Jitter</span>
+            <div class="status-card medium">
 
-            <h2>{{ stats.average_jitter }} ms</h2>
+                <i class="fa-solid fa-triangle-exclamation"></i>
 
-        </div>
+                <div>
 
-        <div class="card">
+                    <h2>Fair Call Quality</h2>
 
-            <span>RTP Streams</span>
+                    <p>Some RTP issues were detected.</p>
 
-            <h2>{{ stats.total_streams }}</h2>
+                </div>
 
-        </div>
+            </div>
 
-        <div class="card">
+        {% else %}
 
-            <span>Issues Detected</span>
+            <div class="status-card bad">
 
-            <h2>{{ issues|length }}</h2>
+                <i class="fa-solid fa-circle-xmark"></i>
 
-        </div>
+                <div>
 
-    </div>
+                    <h2>Poor Call Quality</h2>
 
-    <!-- Status -->
+                    <p>Critical RTP issues require attention.</p>
 
-    <div class="section">
+                </div>
 
-        <h2>Call Quality</h2>
+            </div>
 
-        <div class="status">
+        {% endif %}
 
-            {{ status }}
+    </section>
 
-        </div>
 
-    </div>
+    <!-- DASHBOARD -->
 
-    <!-- AI Summary -->
+    <section class="dashboard-grid">
 
-    <div class="section">
+        <div class="dashboard-card">
 
-        <h2>AI Summary</h2>
+            <i class="fa-solid fa-network-wired"></i>
 
-        <div class="analysis-box">
+            <h2>{{ streams }}</h2>
 
-            <pre>{{ summary }}</pre>
+            <p>RTP Streams</p>
 
         </div>
 
-    </div>
+        <div class="dashboard-card">
 
-    <!-- Issues -->
+            <i class="fa-solid fa-boxes-stacked"></i>
 
-    <div class="section">
+            <h2>{{ stats.total_packets }}</h2>
 
-        <h2>Detected Issues</h2>
+            <p>Total Packets</p>
+
+        </div>
+
+        <div class="dashboard-card">
+
+            <i class="fa-solid fa-arrow-trend-down"></i>
+
+            <h2>{{ packet_loss }}%</h2>
+
+            <p>Packet Loss</p>
+
+        </div>
+
+        <div class="dashboard-card">
+
+            <i class="fa-solid fa-wave-square"></i>
+
+            <h2>{{ jitter }} ms</h2>
+
+            <p>Average Jitter</p>
+
+        </div>
+
+        <div class="dashboard-card">
+
+            <i class="fa-solid fa-repeat"></i>
+
+            <h2>{{ stats.ssrc_changes }}</h2>
+
+            <p>SSRC Changes</p>
+
+        </div>
+
+        <div class="dashboard-card">
+
+            <i class="fa-solid fa-bug"></i>
+
+            <h2>{{ issue_count }}</h2>
+
+            <p>Detected Issues</p>
+
+        </div>
+
+    </section>
+
+
+    <!-- AI SUMMARY -->
+
+    <section class="report-section">
+
+        <h2>
+
+            <i class="fa-solid fa-brain"></i>
+
+            AI Analysis Summary
+
+        </h2>
+
+        <div class="report-card">
+
+            {{ summary }}
+
+        </div>
+
+    </section>
+
+
+    <!-- ISSUES -->
+
+    <section class="report-section">
+
+        <h2>
+
+            <i class="fa-solid fa-triangle-exclamation"></i>
+
+            Detected Issues
+
+        </h2>
 
         {% if issues %}
 
             {% for issue in issues %}
 
-            <div class="feature" style="margin-top:20px;">
+            <div class="issue-card">
 
-                <h3>{{ issue.title }}</h3>
+                <div class="issue-header">
 
-                <p><strong>Severity:</strong> {{ issue.severity }}</p>
+                    <h3>{{ issue.title }}</h3>
+
+                    <span class="severity {{ issue.severity|lower }}">
+
+                        {{ issue.severity }}
+
+                    </span>
+
+                </div>
+
+                <p><strong>Stream:</strong> {{ issue.stream }}</p>
 
                 <p><strong>Reason:</strong> {{ issue.reason }}</p>
 
@@ -143,37 +265,41 @@
 
         {% else %}
 
-            <p>No issues detected.</p>
+            <div class="report-card">
+
+                No issues detected.
+
+            </div>
 
         {% endif %}
 
-    </div>
+    </section>
 
-    <!-- Stream Table -->
 
-    <div class="section">
+    <!-- STREAM METRICS -->
 
-        <h2>RTP Stream Metrics</h2>
+    <section class="report-section">
 
-        <table>
+        <h2>
+
+            <i class="fa-solid fa-chart-column"></i>
+
+            RTP Stream Metrics
+
+        </h2>
+
+        <table class="stream-table">
 
             <thead>
 
                 <tr>
 
-                    <th>#</th>
-
                     <th>Source</th>
-
                     <th>Destination</th>
-
                     <th>Packets</th>
-
-                    <th>Loss %</th>
-
+                    <th>Loss</th>
                     <th>Jitter</th>
-
-                    <th>SSRC Changes</th>
+                    <th>SSRC</th>
 
                 </tr>
 
@@ -181,39 +307,31 @@
 
             <tbody>
 
-            {% for stream in stats.streams %}
+                {% for s in stats.streams %}
 
                 <tr>
 
-                    <td>{{ loop.index }}</td>
+                    <td>{{ s.src }}</td>
 
-                    <td>{{ stream.src }}</td>
+                    <td>{{ s.dst }}</td>
 
-                    <td>{{ stream.dst }}</td>
+                    <td>{{ s.packet_count }}</td>
 
-                    <td>{{ stream.packet_count }}</td>
+                    <td>{{ s.packet_loss }}</td>
 
-                    <td>{{ "%.2f"|format(stream.packet_loss) }}</td>
+                    <td>{{ s.average_jitter }}</td>
 
-                    <td>{{ stream.average_jitter }}</td>
-
-                    <td>{{ stream.ssrc_changes }}</td>
+                    <td>{{ s.ssrc_changes }}</td>
 
                 </tr>
 
-            {% endfor %}
+                {% endfor %}
 
             </tbody>
 
         </table>
 
-    </div>
-	<div class="buttons">
-    <a href="{{ url_for('download_report') }}" class="download-btn">
-        📄 Download Analysis Report
-    </a>
-</div>
-
+    </section>
 
 </div>
 

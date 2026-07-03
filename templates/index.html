@@ -1,16 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI VoIP Call Analyzer</title>
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <title>PCAP Analyzer | AI VoIP Call Analysis</title>
 
-<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+          rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+    <!-- Main CSS -->
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+<!-- Browser Tab Icon -->
+<link rel="icon"
+      type="image/png"
+      href="{{ url_for('static', filename='images/logo.png') }}">
 
 </head>
 
@@ -18,139 +34,451 @@
 
 <div class="background"></div>
 
-<nav class="navbar">
+<header class="navbar">
 
-<div class="logo">
+    <div class="container">
 
-<div class="logo-icon">📡</div>
+        <div class="logo">
 
-<div>
+            <img src="{{ url_for('static', filename='images/logo.png') }}"
+                 alt="PCAP Analyzer Logo">
 
-<h2>VoIP Analyzer AI</h2>
+            <div>
 
-<p>Professional PCAP Diagnostics</p>
+                <h2>PCAP Analyzer</h2>
 
-</div>
+                <span>AI VoIP Diagnostics</span>
 
-</div>
+            </div>
 
-</nav>
+        </div>
+
+        <nav>
+
+            <a href="#tools">Insights</a>
+
+        </nav>
+
+    </div>
+
+</header>
 
 <section class="hero">
 
-<div class="left">
+    <div class="container hero-grid">
 
-<span class="badge">
-🚀 AI Powered Telecom Diagnostics
-</span>
+        <div class="hero-left">
 
-<h1>
+            <div class="badge">
 
-Analyze VoIP Calls Like a Telecom Engineer
+                <i class="fa-solid fa-sparkles"></i>
 
-</h1>
+                AI Powered VoIP Troubleshooting
 
-<p>
+            </div>
 
-Upload a PCAP capture and instantly detect RTP packet loss,
-codec issues, SSRC changes, jitter and receive an AI-generated
-root cause analysis.
+            <h1>
 
-</p>
+                Analyze VoIP Calls Like a
+                <span>Telecom Engineer</span>
 
-<form action="/upload" method="POST" enctype="multipart/form-data" class="upload-card">
+            </h1>
 
-<div class="upload-area">
+            <p>
 
-<h3>📂 Select PCAP File</h3>
+                Upload your PCAP or PCAPNG capture and instantly detect
+                packet loss, RTP jitter, SSRC changes, codec problems,
+                stream quality and receive an AI generated root cause
+                analysis.
 
-<p>Supported: .pcap .pcapng</p>
+            </p>
 
-<input type="file" name="file" required>
+            <div class="hero-buttons">
 
-</div>
+                <a href="#upload" class="primary-btn">
 
-<button type="submit">
+                    Analyze Now
 
-Analyze PCAP →
+                </a>
 
-</button>
+                <a href="#features" class="secondary-btn">
 
-</form>
+                    Learn More
 
-</div>
+                </a>
+
+            </div>
+
+        </div>
+
+        <div class="hero-right">
+
+            <div class="upload-card" id="upload">
+
+                <div class="upload-icon">
+
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+
+                </div>
+
+                <h2>Upload PCAP File</h2>
+
+                <p>
+
+                    Supported Formats:
+                    <strong>.pcap</strong> &
+                    <strong>.pcapng</strong>
+
+                </p>
+
+                <form action="/upload"
+                      method="POST"
+                      enctype="multipart/form-data">
+
+                    <div class="file-box">
+
+                        <input
+                            type="file"
+                            name="file"
+                            accept=".pcap,.pcapng"
+                            required>
+
+                    </div>
+
+                    <button
+                            type="submit"
+                            class="analyze-btn">
+
+                        <i class="fa-solid fa-magnifying-glass-chart"></i>
+
+                        Analyze PCAP
+
+                    </button>
+
+                </form>
+
+                <div class="secure">
+
+                    <i class="fa-solid fa-lock"></i>
+
+                    Files are processed securely and are never stored.
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
 
 </section>
 
-<section class="features">
+<!--<section
+        class="features"
+        id="features">
 
-<div class="feature">
+    <div class="container">
 
-<h2>📡 RTP Analysis</h2>
+        <div class="section-title">
 
-<p>
+            <h2>
 
-Packet loss, sequence gaps,
-SSRC changes,
-payload analysis,
-MOS estimation.
+                Everything Required For
+                VoIP Troubleshooting
 
-</p>
+            </h2>
 
-</div>
+            <p>
 
-<div class="feature">
+                Built for Network Engineers,
+                VoIP Engineers and Support Teams.
 
-<h2>📞 SIP Inspection</h2>
+            </p>
 
-<p>
+        </div>
 
-INVITE,
-REGISTER,
-BYE,
-Call Flow,
-Response Codes,
-Codec Negotiation.
+        <div class="feature-grid">
 
-</p>
+            <div class="feature-card">
 
-</div>
+                <i class="fa-solid fa-wave-square"></i>
 
-<div class="feature">
+                <h3>RTP Analysis</h3>
 
-<h2>🧠 AI Diagnosis</h2>
+                <p>
 
-<p>
+                    Packet Loss, Jitter,
+                    SSRC Changes,
+                    Payload Type,
+                    Codec Detection.
 
-Automatic root cause analysis,
-confidence score,
-recommendations.
+                </p>
 
-</p>
+            </div>
 
-</div>
+            <div class="feature-card">
 
-<div class="feature">
+                <i class="fa-solid fa-phone-volume"></i>
 
-<h2>📊 Dashboard</h2>
+                <h3>Call Quality</h3>
 
-<p>
+                <p>
 
-Beautiful enterprise dashboard
-with stream metrics and health
-status.
+                    Measure stream quality
+                    and detect degraded RTP
+                    conversations automatically.
 
-</p>
+                </p>
 
-</div>
+            </div>
+
+            <div class="feature-card">
+
+                <i class="fa-solid fa-brain"></i>
+
+                <h3>AI Diagnosis</h3>
+
+                <p>
+
+                    Automatic root cause analysis
+                    with confidence score and
+                    recommendations.
+
+                </p>
+
+            </div>
+            <div class="feature-card">
+
+                <i class="fa-solid fa-network-wired"></i>
+
+                <h3>Stream Analysis</h3>
+
+                <p>
+
+                    Automatically groups RTP packets into
+                    streams and calculates detailed metrics.
+
+                </p>
+
+            </div>
+
+            <div class="feature-card">
+
+                <i class="fa-solid fa-chart-line"></i>
+
+                <h3>Performance Metrics</h3>
+
+                <p>
+
+                    View packet counts, packet loss,
+                    average jitter and SSRC changes
+                    for every call.
+
+                </p>
+
+            </div>
+
+            <div class="feature-card">
+
+                <i class="fa-solid fa-file-pdf"></i>
+
+                <h3>PDF Report</h3>
+
+                <p>
+
+                    Export a professional analysis report
+                    including AI recommendations.
+
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>-->
+
+<section class="tools" id="tools">
+
+    <div class="container">
+
+        <div class="section-title">
+
+            <h2>What The Analyzer Detects</h2>
+
+            <p>
+
+                Comprehensive VoIP diagnostics powered by
+                Python, Tshark and AI.
+
+            </p>
+
+        </div>
+
+        <div class="tool-grid">
+
+            <div class="tool-card">
+
+                <i class="fa-solid fa-arrow-trend-down"></i>
+
+                <h3>Packet Loss</h3>
+
+                <p>
+
+                    Detect missing RTP packets and calculate
+                    packet loss percentage.
+
+                </p>
+
+            </div>
+
+            <div class="tool-card">
+
+                <i class="fa-solid fa-wave-square"></i>
+
+                <h3>Jitter Analysis</h3>
+
+                <p>
+
+                    Measure RTP jitter and identify
+                    unstable network conditions.
+
+                </p>
+
+            </div>
+
+            <div class="tool-card">
+
+                <i class="fa-solid fa-repeat"></i>
+
+                <h3>SSRC Changes</h3>
+
+                <p>
+
+                    Detect unexpected SSRC changes that
+                    affect media continuity.
+
+                </p>
+
+            </div>
+
+            <div class="tool-card">
+
+                <i class="fa-solid fa-microchip"></i>
+
+                <h3>Codec Detection</h3>
+
+                <p>
+
+                    Identify RTP payload types and
+                    codecs used during the call.
+
+                </p>
+
+            </div>
+
+            <div class="tool-card">
+
+                <i class="fa-solid fa-robot"></i>
+
+                <h3>AI Recommendations</h3>
+
+                <p>
+
+                    Receive intelligent troubleshooting
+                    recommendations for detected issues.
+
+                </p>
+
+            </div>
+
+            <div class="tool-card">
+
+                <i class="fa-solid fa-gauge-high"></i>
+
+                <h3>Call Quality</h3>
+
+                <p>
+
+                    Quickly determine whether the
+                    call quality is Good, Fair or Poor.
+
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<section class="cta">
+
+    <div class="container">
+
+        <h2>
+
+            Ready to Analyze Your VoIP Capture?
+
+        </h2>
+
+        <p>
+
+            Upload your PCAP file and receive an
+            AI-powered diagnostics report in seconds.
+
+        </p>
+
+        <a href="#upload" class="primary-btn">
+
+            Start Analysis
+
+        </a>
+
+    </div>
 
 </section>
 
 <footer>
 
-Built for VoIP Engineers • SIP Analysts • NOC Teams
+    <div class="container footer-content">
+
+        <div>
+
+            <h3>PCAP Analyzer</h3>
+
+            <p>
+
+                Professional AI-powered VoIP Call
+                Analysis Platform.
+
+            </p>
+
+        </div>
+
+        <div>
+
+            <p>
+
+                Flask • Python • Tshark • AI
+
+            </p>
+
+            <p>
+ 
+                © 2026 All Rights Reserved
+
+            </p>
+
+        </div>
+
+    </div>
 
 </footer>
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
 
 </body>
 </html>
